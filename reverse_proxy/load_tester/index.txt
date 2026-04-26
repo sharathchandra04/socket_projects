@@ -1,0 +1,68 @@
+load_tester/
+│
+├── core/
+│   ├── main.py              # entry point (starts master)
+│   ├── master.py            # orchestration layer
+│   ├── worker.py            # single worker process (event loop owner)
+│   ├── event_loop.py        # epoll wrapper
+│   ├── fd_registry.py       # fd → connection mapping
+│
+├── client/
+│   ├── client_connection.py # per-client state machine
+│   ├── client_pool.py       # creates and tracks M clients
+│   ├── client_generator.py  # request generator
+│
+├── network/
+│   ├── socket_utils.py      # non-blocking socket helpers
+│   ├── reader.py            # recv + parsing logic
+│   ├── writer.py            # send logic
+│
+├── protocol/
+│   ├── protocol.py          # constants (header format, magic bytes)
+│   ├── serializer.py        # encode request
+│   ├── parser.py            # decode response
+│
+├── state/
+│   ├── client_state.py      # CONNECTING/WRITING/READING/DONE
+│
+├── metrics/
+│   ├── stats.py             # latency, success, failure tracking
+│
+├── config/
+│   ├── config.py            # host, port, M, buffer sizes
+│
+├── utils/
+│   ├── logger.py            # logging wrapper
+│   ├── time_utils.py        # timestamps
+│
+└── README.md
+
+# Create the directory structure
+mkdir -p load_tester/core load_tester/client load_tester/network load_tester/protocol load_tester/state load_tester/metrics load_tester/config load_tester/utils
+
+# Create files for /core
+touch load_tester/core/main.py load_tester/core/master.py load_tester/core/worker.py load_tester/core/event_loop.py load_tester/core/fd_registry.py
+
+# Create files for /client
+touch load_tester/client/client_connection.py load_tester/client/client_pool.py load_tester/client/client_generator.py
+
+# Create files for /network
+touch load_tester/network/socket_utils.py load_tester/network/reader.py load_tester/network/writer.py
+
+# Create files for /protocol
+touch load_tester/protocol/protocol.py load_tester/protocol/serializer.py load_tester/protocol/parser.py
+
+# Create files for /state
+touch load_tester/state/client_state.py
+
+# Create files for /metrics
+touch load_tester/metrics/stats.py
+
+# Create files for /config
+touch load_tester/config/config.py
+
+# Create files for /utils
+touch load_tester/utils/logger.py load_tester/utils/time_utils.py
+
+# Create root files
+touch load_tester/README.md

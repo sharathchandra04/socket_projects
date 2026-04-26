@@ -1,1 +1,183 @@
 this is index
+
+If you want to go one level deeper next, the most useful topics would be:
+
+Edge-triggered vs level-triggered epoll (critical for correctness)
+Accept queue & backlog tuning
+Thundering herd problem and how Nginx avoids it
+How keep-alive connections affect worker load distribution
+
+
+
+How connections get distributed
+	Two valid models:
+	Model 1: Shared Listening Socket
+		Master creates one listening socket
+		All workers inherit it
+		All workers call accept()
+		Kernel distributes incoming connections
+		Result:
+		Worker 1 gets some connections
+			Worker 2 gets others
+			No duplication
+
+	Model 2: SO_REUSEPORT (cleaner design)
+		Each worker creates its own listening socket
+		All bind to same port
+		Kernel load balances at connection time
+		Result:
+			Better scaling
+			Less contention
+
+
+later implement 2 models
+
+how to view the tcp connectio table ?
+how to identify the connection using the 4 value tuple.
+	Client sends packet
+	     ↓
+	Network card → Kernel
+	     ↓
+	Kernel reads 4-tuple
+	     ↓
+	Kernel finds matching socket (fd)
+	     ↓
+	Data placed in that socket's buffer
+	     ↓
+	epoll notifies worker
+	     ↓
+	Worker reads from that fd
+
+
+	If you want next, I can explain:
+
+Difference between file descriptor vs socket descriptor
+how FD tables are stored per process
+how FD limits affect high-scale servers (very important for your design)
+
+
+$$ use jager to understand how reverse proxy works 
+
+you register a file descriptor (FD) (epoll registration)
+--------------------------------------------------------
+But not just the FD—you’re really registering:
+FD + the events you care about + (optionally) some user data/context
+Conceptually:
+	register:
+	    fd = 42
+	    events = READ | WRITE
+	    context = connection_state_object    
+What epoll stores internally
+	Epoll keeps something like:
+		FD → interest (READ/WRITE/etc.)
+		This is called the interest list.
+What happens later
+	When you call epoll_wait():
+		It returns FDs that are ready
+		Along with which event occurred
+		fd=42 → READ ready
+		fd=57 → WRITE ready
+
+FD (in your process)
+      ↓
+Kernel Socket Object
+      ↓
+   ---------------------
+   | Receive Buffer   |  ← incoming data
+   | Send Buffer      |  ← outgoing data
+   ---------------------
+
+
+If you WANT true even distribution (using model 1 : workers race for new connections)
+-------------------------------------------------------------------------------------
+	Option A: SO_REUSEPORT (Model 2 idea)
+		Each worker has its own listening socket
+		Kernel distributes connections more evenly
+	Option B: Accept mutex (Nginx-style tweak)
+		Only ONE worker at a time is allowed to accept
+		workers rotate responsibility
+	Option C: Central dispatcher (not used in Nginx)
+		One process accepts
+		distributes to workers manually
+
+
+design exact epoll event loop using this simplified model
+simulate full lifecycle of one request across worker + backend
+evolve this later into keep-alive + multiplexing (step-by-step upgrade path)
+multiplexing (client, server both)
+backpressure
+
+
+
+FINAL STRUCTURE
+---------------
+core/
+  main
+  master
+  worker
+  event_loop
+  fd_registry
+
+connection/
+  client_connection
+  backend_connection
+  connection_factory
+
+pool/
+  backend_pool
+  pending_queue
+
+request/
+  request
+  request_manager
+
+protocol/
+  protocol_constants
+  protocol_structs
+  request_parser
+  response_parser
+  serializer
+
+io/
+  socket_utils
+  reader
+  writer
+
+buffer/
+  buffer
+  buffer_pool
+
+state/
+  state_machine
+  timeout_manager
+
+error/
+  error_handler
+  exceptions
+
+config/
+  config
+  constants
+
+observability/
+  logger
+  metrics
+
+utils/
+  id_generator
+  time_utils
+  helpers
+
+testing/
+  mock_client
+  mock_backend
+
+
+
+
+
+
+
+
+
+
