@@ -177,6 +177,12 @@ testing/
 
 
 
+edge triggered vs level triggered
+---------------------------------
+“NGINX uses epoll in edge-triggered mode and relies on non-blocking I/O with careful 
+draining and dynamic event registration to avoid missed events and CPU overhead.”
+
+how backpressure propagates in distributed systems ?
 
 
 

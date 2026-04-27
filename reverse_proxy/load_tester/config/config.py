@@ -5,7 +5,7 @@ class Config:
         self.server_port = 9000
 
         # Load settings
-        self.m_clients = 1000   # M concurrent clients per worker
+        self.m_clients = 2   # M concurrent clients per worker
 
         # Network tuning
         self.buffer_size = 4096

@@ -60,17 +60,20 @@ class ClientConnection:
     # -----------------------------
     def on_write(self, worker):
         try:
+            print("inside on_write state before -> ", self.state)
             if self.state == "CONNECTING":
                 self.state = "WRITING"
                 self.write_buffer = self.generator.generate()
+                print("self.write_buffer generated --> ", self.write_buffer, len(self.write_buffer))
 
             if self.write_buffer:
                 sent = self.sock.send(self.write_buffer)
+                print("self.write_buffer sent --> ", sent)
                 self.write_buffer = self.write_buffer[sent:]
 
             if not self.write_buffer:
                 self.state = "READING"
-
+            print("inside on_write state after -> ", self.state)
         except socket.error as e:
             if e.errno not in (errno.EAGAIN, errno.EWOULDBLOCK):
                 self.close(worker)

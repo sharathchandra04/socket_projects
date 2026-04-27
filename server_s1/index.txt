@@ -1,0 +1,11 @@
+------------------------
+Client → connect
+Client → send (10 bytes)
+Server → read (10 bytes)
+Server → send (10 bytes)
+Server → close
+Client → read (10 bytes)
+Client → close
+
+------------------------
+
