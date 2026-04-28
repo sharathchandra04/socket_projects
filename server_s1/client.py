@@ -4,10 +4,10 @@ import select
 
 HOST = "127.0.0.1"
 PORT = 9090
-MSG_SIZE = 10
+MSG_SIZE = 20
 
 def pad(msg: str) -> bytes:
-    return msg.encode().ljust(MSG_SIZE, b' ')[:MSG_SIZE]
+    return msg.encode().ljust(MSG_SIZE, b'@')[:MSG_SIZE]
 
 def run():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,6 +24,7 @@ def run():
     epoll.register(fd, select.EPOLLOUT | select.EPOLLET)
 
     outb = pad("hello123")
+    print(outb)
     inb = b""
 
     try:
@@ -31,7 +32,7 @@ def run():
             events = epoll.poll(1)
 
             for fileno, event in events:
-
+                print('event loop --> ', fileno, event)
                 # Write
                 if event & select.EPOLLOUT:
                     while outb:
@@ -48,14 +49,19 @@ def run():
                 # Read
                 elif event & select.EPOLLIN:
                     while True:
+                        print("inside while")
                         try:
-                            data = sock.recv(1024)
+                            # print("before sock recv")
+                            data = sock.recv(1)
+                            # print("ater sock recv")
+                            print("data --> ", data)
                             if not data:
                                 break
-
+                            
                             inb += data
 
                             if len(inb) >= MSG_SIZE:
+                                print("inside the close block")
                                 msg = inb[:MSG_SIZE]
                                 print("Received:", msg.decode().strip())
 
@@ -64,7 +70,9 @@ def run():
                                 return
 
                         except BlockingIOError:
+                            print("blocking IO Error")
                             break
+                    print("loop break")
 
     finally:
         epoll.close()
