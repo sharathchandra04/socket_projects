@@ -1,0 +1,7 @@
+In your `proxy_server.py`, backend connections are created using **non-blocking `connect()`**, 
+which returns `EINPROGRESS` (raised as `BlockingIOError`), meaning the TCP connection is not 
+yet established. However, you immediately register the socket for `EPOLLIN`, assuming 
+it is ready for I/O. This is incorrect because, in non-blocking mode, **connection 
+completion must be detected via `EPOLLOUT`**, and only after receiving this event (and 
+optionally checking `SO_ERROR`) should the socket be treated as connected and switched to 
+normal read/write handling.
