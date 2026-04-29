@@ -14,6 +14,7 @@ def try_parse(buf):
     if len(buf) < 4:
         return None, buf
     length = int.from_bytes(buf[:4], "big")
+    print("message length --> ", length) 
     if len(buf) < 4 + length:
         return None, buf
     msg = buf[4:4+length]
@@ -50,7 +51,7 @@ def run():
                 c = conns[fd]
                 while True:
                     try:
-                        data = c.recv(1024)
+                        data = c.recv(1)
                         if not data:
                             raise Exception()
                         inb[fd] += data

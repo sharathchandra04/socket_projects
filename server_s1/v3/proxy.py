@@ -75,12 +75,13 @@ def run():
                 c = clients[fd]
                 while True:
                     try:
-                        data = c.recv(1024)
+                        data = c.recv(1)
                         if not data:
                             raise Exception()
                         cin[fd] += data
 
                         msg, cin[fd] = try_parse(cin[fd])
+                        print('reading message from client -> ', msg, cin[fd])
                         if msg:
                             bfd = free.popleft()
                             b2c[bfd] = fd
@@ -110,12 +111,13 @@ def run():
                 b = backends[fd]
                 while True:
                     try:
-                        data = b.recv(1024)
+                        data = b.recv(1)
                         if not data:
                             raise Exception()
                         binb[fd] += data
 
                         msg, binb[fd] = try_parse(binb[fd])
+                        print('reading message from backend -> ', msg, binb[fd])
                         if msg:
                             cfd = b2c[fd]
                             cout[cfd] = encode_msg(msg)

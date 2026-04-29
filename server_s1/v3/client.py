@@ -55,12 +55,13 @@ def run():
             elif ev & select.EPOLLIN:
                 while True:
                     try:
-                        data = sock.recv(1024)
+                        data = sock.recv(1)
                         if not data:
                             return
                         inb += data
 
                         msg, inb = try_parse(inb)
+                        print(msg, inb)
                         if msg:
                             print("Received:", msg.decode())
                             return
