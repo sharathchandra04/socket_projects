@@ -37,6 +37,7 @@ def handle_read(conn):
             return False  # client closed
         conn.in_buffer += data
     except BlockingIOError:
+        # when willl we get BlockingIoError ?
         return True
 
     # Process command
